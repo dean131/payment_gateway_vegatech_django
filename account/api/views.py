@@ -9,6 +9,19 @@ from .serializers import UserModelSerializer
 
 
 class UserViewSet(viewsets.ViewSet):
+    def list(self, request):
+        users = models.User.objects.all()
+        serializer = UserModelSerializer(users, many=True)
+        return Response(
+            {
+                'code': status.HTTP_200_OK,
+                'success': True,
+                'message': 'Berhasil mendapatkan data user',
+                'data': serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
     def retrieve(self, request, pk=None):
         if not models.User.objects.filter(id=pk).exists():
             return Response(
