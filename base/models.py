@@ -70,7 +70,7 @@ class Pembayaran(models.Model):
     pembelian = models.ForeignKey(Pembelian, on_delete=models.CASCADE)
     transaksi_id = models.CharField(max_length=255, blank=True, null=True)
     nama_bank = models.CharField(max_length=20)
-    is_bayar = models.BooleanField(default=False)
+    status_pembayaran = models.CharField(max_length=20, default='belum_bayar')
     waktu_pembayaran = models.DateTimeField(auto_now=True)
     no_va = models.CharField(max_length=255, blank=True, null=True)
 

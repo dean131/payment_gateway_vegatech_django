@@ -6,6 +6,7 @@ from django.conf import settings
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from account.models import User
 
@@ -183,7 +184,48 @@ class PembayaranViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
     
-    # @action(detail=False, methods=['post'])
-    # def 
+    @action(detail=False, methods=['post'])
+    def notification_handler(self, request):
+        status_transaksi = request.data.get('transaction_status')
+        no_va = request.data.get('va_numbers')[0]['va_number']
 
+        pembayaran = models.Pembayaran.objects.filter(no_va=no_va).first()
 
+        if status_transaksi == 'expire':
+            pembayaran.status_pembayaran = 'kadaluarsa'
+            pembayaran.save()
+            return Response(
+                {
+                    'code': status.HTTP_400_BAD_REQUEST,
+                    'success': False,
+                    'message': 'Pembayaran kadaluarsa',
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if status_transaksi == 'cancel':
+            pembayaran.status_pembayaran = 'dibatalkan'
+            pembayaran.save()
+            return Response(
+                {
+                    'code': status.HTTP_400_BAD_REQUEST,
+                    'success': False,
+                    'message': 'Pembayaran dibatalkan',
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if status_transaksi == 'settlement':
+            pembayaran.status_pembayaran = 'dibayar'
+            pembayaran.save()
+
+        return Response(
+            {
+                'code': status.HTTP_200_OK,
+                'success': True,
+                'message': 'Pembayaran berhasil dibayar',
+            },
+            status=status.HTTP_200_OK
+        )
+
+        
