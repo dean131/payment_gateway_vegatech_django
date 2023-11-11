@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from account.api.serializers import UserModelSerializer
+
 from base import models
 
 
@@ -10,6 +12,7 @@ class ProdukModelSerializer(serializers.ModelSerializer):
 
 
 class PembelianModelSerializer(serializers.ModelSerializer):
+    user = UserModelSerializer()
     class Meta:
         model = models.Pembelian
         fields = '__all__'

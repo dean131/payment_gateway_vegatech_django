@@ -87,7 +87,7 @@ class PembayaranViewSet(viewsets.ViewSet):
             "payment_type": "bank_transfer",
             "transaction_details": {
                 "gross_amount": pembelian.total_harga_pembelian,
-                "order_id": pembelian.pembelian_id,
+                "order_id": str(pembelian.pembelian_id),
             },
             "bank_transfer":{
                 "bank": nama_bank,
@@ -100,18 +100,19 @@ class PembayaranViewSet(viewsets.ViewSet):
 
         pembayaran = models.Pembayaran.objects.create(
             pembelian=pembelian,
-            kode_pembayaran=charge_response['order_id'],
-            total_pembayaran=charge_response['gross_amount'],
-            status_pembayaran=charge_response['transaction_status'],
-            nama_bank=nama_bank
+            transaksi_id=charge_response['transaction_id'],
+            nama_bank=nama_bank,
+            waktu_pembayaran=charge_response['transaction_time'],
+            no_va=charge_response['va_numbers'][0]['va_number']
         )
 
+        pembayaran_serializer = serializers.PembayaranModelSerializer(pembayaran)
         return Response(
             {
                 'code': status.HTTP_201_CREATED,
                 'success': True,
                 'message': 'Pembayaran berhasil ditambahkan',
-                'data': charge_response
+                'data': pembayaran_serializer.data
             },
             status=status.HTTP_201_CREATED
         )
@@ -181,5 +182,8 @@ class PembayaranViewSet(viewsets.ViewSet):
             },
             status=status.HTTP_200_OK
         )
+    
+    # @action(detail=False, methods=['post'])
+    # def 
 
 

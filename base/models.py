@@ -72,6 +72,5 @@ class Pembayaran(models.Model):
     nama_bank = models.CharField(max_length=20)
     is_bayar = models.BooleanField(default=False)
     waktu_pembayaran = models.DateTimeField(auto_now=True)
-    waktu_kedaluarsa = models.DateTimeField(blank=True, null=True)
     no_va = models.CharField(max_length=255, blank=True, null=True)
 
