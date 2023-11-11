@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
@@ -6,10 +8,27 @@ from base.api import serializers
 from base import models
 
 
-class ProdukViewSet(viewsets.ViewSet):
+class ProdukViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ProdukModelSerializer
+
+    def get_queryset(self):
+        queryset = models.Produk.objects.all()
+        search = self.request.query_params.get('search')
+        kategori = self.request.query_params.get('kategori_produk')
+
+        if search:
+            queryset = queryset.filter(
+                Q(nama_produk__icontains=search) | 
+                Q(kategori_produk__icontains=search)
+            )
+
+        if kategori:
+            queryset = queryset.filter(kategori_produk=kategori)
+        return queryset
+    
     def list(self, request):
-        produks = models.Produk.objects.all()
-        serializer = serializers.ProdukModelSerializer(produks, many=True)
+        produks = self.get_queryset()
+        serializer = self.get_serializer(produks, many=True)
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -34,7 +53,7 @@ class ProdukViewSet(viewsets.ViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        serializer = serializers.ProdukModelSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(
                 {
@@ -67,7 +86,7 @@ class ProdukViewSet(viewsets.ViewSet):
             )
         
         produk = models.Produk.objects.get(produk_id=pk)
-        serializer = serializers.ProdukModelSerializer(produk)
+        serializer = self.get_serializer(produk)
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -103,7 +122,7 @@ class ProdukViewSet(viewsets.ViewSet):
                 )
 
         produk = models.Produk.objects.get(produk_id=pk)
-        serializer = serializers.ProdukModelSerializer(produk, data=request.data, partial=True)
+        serializer = self.get_serializer(produk, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(
                 {

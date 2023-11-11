@@ -8,10 +8,15 @@ from account import models
 from .serializers import UserModelSerializer
 
 
-class UserViewSet(viewsets.ViewSet):
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserModelSerializer
+
+    def get_queryset(self):
+        return models.User.objects.all()
+
     def list(self, request):
         users = models.User.objects.all()
-        serializer = UserModelSerializer(users, many=True)
+        serializer = self.get_serializer(users, many=True)
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -23,7 +28,7 @@ class UserViewSet(viewsets.ViewSet):
         )
 
     def retrieve(self, request, pk=None):
-        if not models.User.objects.filter(id=pk).exists():
+        if not models.User.objects.filter(user_id=pk).exists():
             return Response(
                 {
                     'code': status.HTTP_404_NOT_FOUND,
@@ -33,20 +38,20 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        user = models.User.objects.get(id=pk)
+        user = models.User.objects.get(user_id=pk)
 
         return Response(
             {
                 'code': status.HTTP_200_OK,
                 'success': True,
                 'message': 'Berhasil mendapatkan data user',
-                'data': UserModelSerializer(user).data,
+                'data': self.get_serializer(user).data,
             },
             status=status.HTTP_200_OK
         )
     
     def update(self, request, pk=None):
-        if not models.User.objects.filter(id=pk).exists():
+        if not models.User.objects.filter(user_id=pk).exists():
             return Response(
                 {
                     'code': status.HTTP_404_NOT_FOUND,
@@ -56,9 +61,9 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        user = models.User.objects.get(pk=pk)
+        user = models.User.objects.get(user_id=pk)
 
-        if models.User.objects.filter(email=request.data.get('email')).exclude(id=pk).exists():
+        if models.User.objects.filter(email=request.data.get('email')).exclude(user_id=pk).exists():
             return Response(
                 {
                     'code': status.HTTP_400_BAD_REQUEST,
@@ -68,7 +73,7 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = UserModelSerializer(user, data=request.data, partial=True)
+        serializer = self.get_serializer(user, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(
                 {
@@ -92,7 +97,7 @@ class UserViewSet(viewsets.ViewSet):
         )
     
     def destroy(self, request, pk=None):
-        if not models.User.objects.filter(id=pk).exists():
+        if not models.User.objects.filter(user_id=pk).exists():
             return Response(
                 {
                     'code': status.HTTP_404_NOT_FOUND,
@@ -102,7 +107,7 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        user = models.User.objects.get(pk=pk)
+        user = models.User.objects.get(user_id=pk)
         user.delete()
         return Response(
             {

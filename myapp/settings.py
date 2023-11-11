@@ -21,6 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure--xwhejio2^*+ru6$5g*6iw_h%j@eilu0fuhh(u+l42yhj*3d1_'
 
+# Client Key for Midtrans
+MIDTRANS_CLIENT_KEY = 'SB-Mid-client-CgNmu_mHypP0atiA'
+
+# Server key for Midtrans
+MIDTRANS_SERVER_KEY = 'SB-Mid-server-4X21ViQps6cYf4W5Mt0eqYWd'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

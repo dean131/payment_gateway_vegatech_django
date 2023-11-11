@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
@@ -44,9 +46,15 @@ class PembelianViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
     
+    @transaction.atomic
     def create(self, request):
         user_id = request.data.get('user_id')
+        produk_id = request.data.get('produk_id')
+        kuantitas = request.data.get('kuantitas')
+
         user = User.objects.filter(user_id=user_id).first()
+        produk = models.Produk.objects.filter(produk_id=produk_id).first()
+
         if not user:
             return Response(
                 {
@@ -56,31 +64,26 @@ class PembelianViewSet(viewsets.ViewSet):
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+        if not produk:
+            return Response(
+                {
+                    'code': status.HTTP_404_NOT_FOUND,
+                    'success': False,
+                    'message': 'Produk tidak ditemukan',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        request.data.update({'user': user.user_id})
-        serializer = serializers.PembelianModelSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                {
-                    'code': status.HTTP_400_BAD_REQUEST,
-                    'success': False,
-                    'message': 'Pembelian gagal ditambahkan',
-                    'data': serializer.errors
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        pembelian, created = models.Pembelian.objects.get_or_create(**serializer.validated_data)
-        
-        if not created:
-            return Response(
-                {
-                    'code': status.HTTP_400_BAD_REQUEST,
-                    'success': False,
-                    'message': 'Pembelian telah dibuat',
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        pembelian, created = models.Pembelian.objects.get_or_create(user=user)
+
+        item, created = models.Item.objects.get_or_create(pembelian=pembelian, produk=produk)
+        item.kuantitas = kuantitas
+        item.total_harga_item = produk.harga_produk * kuantitas
+        item.save()
+
+        pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
+        pembelian.save()
 
         return Response(
             {
@@ -146,4 +149,5 @@ class PembelianViewSet(viewsets.ViewSet):
             },
             status=status.HTTP_200_OK
         )
-    
+
+

@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from rest_framework import viewsets 
 from rest_framework.response import Response
 from rest_framework import status
@@ -138,6 +140,7 @@ class ItemViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @transaction.atomic
     def destroy(self, request, pk=None):
         if not models.Item.objects.filter(item_id=pk).exists():
             return Response(
@@ -150,7 +153,23 @@ class ItemViewSet(viewsets.ViewSet):
             )
 
         item = models.Item.objects.get(item_id=pk)
+        pembelian = item.pembelian
+
+        if pembelian.status_pembelian == 'selesai':
+            return Response(
+                {
+                    'code': status.HTTP_400_BAD_REQUEST,
+                    'success': False,
+                    'message': 'Pembelian sudah selesai, tidak bisa menghapus item',
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         item.delete()
+
+        pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
+        pembelian.save()
+
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -158,7 +177,7 @@ class ItemViewSet(viewsets.ViewSet):
                 'message': 'Item berhasil dihapus',
             },
             status=status.HTTP_200_OK
-        )
+        )   
 
 
 
