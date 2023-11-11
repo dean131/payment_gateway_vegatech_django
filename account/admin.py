@@ -3,8 +3,8 @@ from . import models
 
 
 class UserModelAdmin(admin.ModelAdmin):
-    list_display = ("id", "nama_lengkap", "email", "is_admin")
-    search_fields = ("id", "nama_lengkap", "email", "is_admin")
+    list_display = ("user_id", "nama_lengkap", "email", "is_admin")
+    search_fields = ("user_id", "nama_lengkap", "email", "is_admin")
 
 
 admin.site.register(models.User, UserModelAdmin)

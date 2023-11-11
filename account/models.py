@@ -40,7 +40,7 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
+    user_id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     email = models.EmailField(verbose_name="email address", max_length=255, unique=True)
     nama_lengkap = models.CharField(max_length=255)
     jenis_kelamin = models.CharField(max_length=255)

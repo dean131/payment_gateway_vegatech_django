@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from base.api import serializers
 from base import models
 
+
 class ProdukViewSet(viewsets.ViewSet):
     def list(self, request):
         produks = models.Produk.objects.all()
-        serializer = serializers.ProdukSerializer(produks, many=True)
+        serializer = serializers.ProdukModelSerializer(produks, many=True)
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -33,7 +34,7 @@ class ProdukViewSet(viewsets.ViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        serializer = serializers.ProdukSerializer(data=request.data)
+        serializer = serializers.ProdukModelSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
                 {
@@ -50,13 +51,12 @@ class ProdukViewSet(viewsets.ViewSet):
                 'code': status.HTTP_201_CREATED,
                 'success': True,
                 'message': 'Produk berhasil ditambahkan',
-                'data': serializer.data
             },
             status=status.HTTP_201_CREATED
         )
 
     def retrieve(self, request, pk=None):
-        if not models.Produk.objects.filter(id=pk).exists():
+        if not models.Produk.objects.filter(produk_id=pk).exists():
             return Response(
                 {
                     'code': status.HTTP_404_NOT_FOUND,
@@ -66,8 +66,8 @@ class ProdukViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        produk = models.Produk.objects.get(id=pk)
-        serializer = serializers.ProdukSerializer(produk)
+        produk = models.Produk.objects.get(produk_id=pk)
+        serializer = serializers.ProdukModelSerializer(produk)
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -79,7 +79,7 @@ class ProdukViewSet(viewsets.ViewSet):
         )
 
     def update(self, request, pk=None):
-        if not models.Produk.objects.filter(id=pk).exists():
+        if not models.Produk.objects.filter(produk_id=pk).exists():
             return Response(
                 {
                     'code': status.HTTP_404_NOT_FOUND,
@@ -102,8 +102,8 @@ class ProdukViewSet(viewsets.ViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        produk = models.Produk.objects.get(id=pk)
-        serializer = serializers.ProdukSerializer(produk, data=request.data, partial=True)
+        produk = models.Produk.objects.get(produk_id=pk)
+        serializer = serializers.ProdukModelSerializer(produk, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(
                 {
@@ -121,13 +121,12 @@ class ProdukViewSet(viewsets.ViewSet):
                 'code': status.HTTP_200_OK,
                 'success': True,
                 'message': 'Produk berhasil diupdate',
-                'data': serializer.data
             },
             status=status.HTTP_200_OK
         )
 
     def destroy(self, request, pk=None):
-        if not models.Produk.objects.filter(id=pk).exists():
+        if not models.Produk.objects.filter(produk_id=pk).exists():
             return Response(
                 {
                     'code': status.HTTP_404_NOT_FOUND,
@@ -137,7 +136,7 @@ class ProdukViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        produk = models.Produk.objects.get(id=pk)
+        produk = models.Produk.objects.get(produk_id=pk)
         produk.delete()
         return Response(
             {
