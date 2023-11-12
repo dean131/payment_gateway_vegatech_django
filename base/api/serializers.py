@@ -19,6 +19,7 @@ class PembelianModelSerializer(serializers.ModelSerializer):
 
 
 class ItemModelSerializer(serializers.ModelSerializer):
+    produk = ProdukModelSerializer()
     class Meta:
         model = models.Item
         fields = '__all__'

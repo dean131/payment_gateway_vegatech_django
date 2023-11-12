@@ -108,6 +108,9 @@ class PembayaranViewSet(viewsets.ViewSet):
         )
 
         pembayaran_serializer = serializers.PembayaranModelSerializer(pembayaran)
+
+        pembelian = 'belum_bayar'
+        pembelian.save()
         return Response(
             {
                 'code': status.HTTP_201_CREATED,
@@ -189,6 +192,8 @@ class PembayaranViewSet(viewsets.ViewSet):
         status_transaksi = request.data.get('transaction_status')
         no_va = request.data.get('va_numbers')[0]['va_number']
 
+        print(f'status_transaksi: {status_transaksi}')
+
         pembayaran = models.Pembayaran.objects.filter(no_va=no_va).first()
 
         if status_transaksi == 'expire':
@@ -217,6 +222,8 @@ class PembayaranViewSet(viewsets.ViewSet):
 
         if status_transaksi == 'settlement':
             pembayaran.status_pembayaran = 'dibayar'
+            pembayaran.save()
+            pembayaran.pembelian.status_pembelian = 'diproses'
             pembayaran.save()
 
         return Response(

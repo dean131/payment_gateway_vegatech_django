@@ -9,9 +9,22 @@ from base.api import serializers
 from base import models
    
 
-class PembelianViewSet(viewsets.ViewSet):
+class PembelianViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        queryset = models.Pembelian.objects.all()
+        user_id = self.request.query_params.get('user_id')
+        status_pembelian = self.request.query_params.get('status_pembelian')
+
+        if user_id:
+            queryset = queryset.filter(user__user_id=user_id)
+
+        if status_pembelian:
+            queryset = queryset.filter(status_pembelian=status_pembelian)
+
+        return queryset
+
     def list(self, request):
-        pembelians = models.Pembelian.objects.all()
+        pembelians = self.get_queryset()
         serializer = serializers.PembelianModelSerializer(pembelians, many=True)
         return Response(
             {
