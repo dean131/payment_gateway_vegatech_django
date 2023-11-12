@@ -88,9 +88,21 @@ class PembelianViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        pembelian, created = models.Pembelian.objects.get_or_create(user=user)
+        pembelian, created = models.Pembelian.objects.get_or_create(user=user, status_pembelian='keranjang')
 
         item, created = models.Item.objects.get_or_create(pembelian=pembelian, produk=produk)
+        if kuantitas <= 0:
+            item.delete()
+            pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
+            pembelian.save()
+            return Response(
+                {
+                    'code': status.HTTP_200_OK,
+                    'success': True,
+                    'message': 'Item berhasil dihapus',
+                },
+                status=status.HTTP_200_OK
+            )
         item.kuantitas = kuantitas
         item.total_harga_item = produk.harga_produk * kuantitas
         item.save()

@@ -8,9 +8,18 @@ from base.api import serializers
 from base import models
 
 
-class ItemViewSet(viewsets.ViewSet):
+class ItemViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        queryset = models.Item.objects.all()
+        pembelian_id = self.request.query_params.get('pembelian_id')
+
+        if pembelian_id:
+            queryset = queryset.filter(pembelian__pembelian_id=pembelian_id)
+
+        return queryset
+
     def list(self, request):
-        items = models.Item.objects.all()
+        items = self.get_queryset()
         serializer = serializers.ItemModelSerializer(items, many=True)
         return Response(
             {

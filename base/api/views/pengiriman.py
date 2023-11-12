@@ -1,3 +1,5 @@
+from rest_framework.decorators import action
+
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -131,5 +133,74 @@ class PengirimanViewSet(ViewSet):
             },
             status=status.HTTP_200_OK
         )
+    
+    @action(methods=['post'], detail=False)
+    def kirim(self, request):
+        pengiriman_id = request.data.get('pengiriman_id')
+        pengiriman = models.Pengiriman.objects.filter(pengiriman_id=pengiriman_id).first()
+        if not pengiriman:
+            return Response(
+                {
+                    'code': status.HTTP_404_NOT_FOUND,
+                    'success': False,
+                    'message': 'Pengiriman tidak ditemukan',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        pengiriman.status_pengiriman = 'dikirim'
+        pengiriman.save()
+
+        return Response(
+            {
+                'code': status.HTTP_200_OK,
+                'success': True,
+                'message': 'Pengiriman berhasil dikirim',
+            },
+            status=status.HTTP_200_OK
+        )
+    
+    @action(methods=['post'], detail=False)
+    def terima(self, request):
+        pembelian_id = request.data.get('pembelian_id')
+        pembelian = models.Pembelian.objects.filter(pembelian_id=pembelian_id).first()
+        
+        if not pembelian:
+            return Response(
+                {
+                    'code': status.HTTP_404_NOT_FOUND,
+                    'success': False,
+                    'message': 'Pembelian tidak ditemukan',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        pengiriman = models.Pengiriman.objects.filter(pembelian=pembelian).first()
+        if not pengiriman:
+            return Response(
+                {
+                    'code': status.HTTP_404_NOT_FOUND,
+                    'success': False,
+                    'message': 'Pengiriman tidak ditemukan',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        pengiriman.status_pengiriman = 'diterima'
+        pengiriman.save()
+
+        pembelian.status_pembelian = 'selesai'
+        pembelian.save()
+
+        return Response(
+            {
+                'code': status.HTTP_200_OK,
+                'success': True,
+                'message': 'Pengiriman berhasil diterima',
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 
 

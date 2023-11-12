@@ -17,6 +17,9 @@ class Pembelian(models.Model):
     status_pembelian = models.CharField(max_length=20, default='keranjang', choices=STATUS_CHOICES)
     total_harga_pembelian = models.IntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.pembelian_id)
     
 
 class Produk(models.Model):
@@ -33,9 +36,13 @@ class Produk(models.Model):
     nama_produk = models.CharField(max_length=200)
     deskripsi_produk = models.TextField(blank=True, null=True)
     harga_produk = models.IntegerField()
+    berat_produk = models.IntegerField(blank=True, null=True)
     kategori_produk = models.CharField(max_length=200, choices=KATEGORI_CHOICES)
     stok_produk = models.CharField(max_length=200, default='tersedia', choices=STOK_CHOICES)
     gambar_produk = models.ImageField(upload_to='produk/', blank=True, null=True)
+
+    def __str__(self):
+        return self.nama_produk
 
 
 class Item(models.Model):
@@ -46,6 +53,9 @@ class Item(models.Model):
     catatan = models.TextField(blank=True, null=True)
     total_harga_item = models.IntegerField(default=0)
 
+    def __str__(self):
+        return str(self.item_id)
+
 
 class Pengiriman(models.Model):
     METODE_CHOICES = (
@@ -54,23 +64,40 @@ class Pengiriman(models.Model):
     )
     STATUS_CHOICES = (
         ('belum_dikirim', 'Belum dikirim'),
+        ('belum_diambil', 'Belum diambil'),
         ('dikirim', 'Dikirim'),
         ('diterima', 'Diterima'),
+        ('dibatalkan', 'Dibatalkan')
     )
     pengiriman_id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    pembelian = models.ForeignKey(Pembelian, on_delete=models.CASCADE)
+    pembelian = models.OneToOneField(Pembelian, on_delete=models.CASCADE)
     metode_pengiriman = models.CharField(max_length=20, choices=METODE_CHOICES)
-    alamat_pengiriman = models.TextField()
-    status_pengiriman = models.CharField(max_length=20, default='belum_dikirim', choices=STATUS_CHOICES)
+    alamat_pengiriman = models.TextField(null=True, blank=True)
+    status_pengiriman = models.CharField(max_length=20, choices=STATUS_CHOICES)
     no_resi = models.CharField(max_length=255, blank=True, null=True)
+    ongkos_kirim = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.pengiriman_id)
 
 
 class Pembayaran(models.Model):
+    STATUS_CHOICES = (
+        ('belum_bayar', 'Belum bayar'),
+        ('kadaluarsa', 'Kadaluarsa'),
+        ('dibayar', 'Dibayar'),
+        ('dibatalkan', 'Dibatalkan')
+    )
+
     pembayaran_id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     pembelian = models.ForeignKey(Pembelian, on_delete=models.CASCADE)
     transaksi_id = models.CharField(max_length=255, blank=True, null=True)
     nama_bank = models.CharField(max_length=20)
-    status_pembayaran = models.CharField(max_length=20, default='belum_bayar')
+    status_pembayaran = models.CharField(max_length=20, default='belum_bayar', choices=STATUS_CHOICES)
     waktu_pembayaran = models.DateTimeField(auto_now=True)
     no_va = models.CharField(max_length=255, blank=True, null=True)
+    total_pembayaran = models.IntegerField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.pembayaran_id)
 
