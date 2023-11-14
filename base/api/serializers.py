@@ -20,6 +20,7 @@ class PengirimanModelSerializer(serializers.ModelSerializer):
 class PembelianModelSerializer(serializers.ModelSerializer):
     user = UserModelSerializer()
     pengiriman = serializers.SerializerMethodField('get_pengiriman')
+    pembayaran = serializers.SerializerMethodField('get_pembayaran')
     class Meta:
         model = models.Pembelian
         fields = '__all__'
@@ -29,6 +30,11 @@ class PembelianModelSerializer(serializers.ModelSerializer):
             return None
         pengiriman = models.Pengiriman.objects.filter(pembelian=obj).first()
         serializer = PengirimanModelSerializer(pengiriman)
+        return serializer.data
+    
+    def get_pembayaran(self, obj):
+        pembayaran = obj.pembayaran_set.first()
+        serializer = PembayaranSerializer(pembayaran)
         return serializer.data
 
 
@@ -40,7 +46,20 @@ class ItemModelSerializer(serializers.ModelSerializer):
 
 
 class PembayaranModelSerializer(serializers.ModelSerializer):
-    pembelian = PembelianModelSerializer()
+    pembelian = serializers.SerializerMethodField('get_pembelian')
     class Meta:
         model = models.Pembayaran
         fields = '__all__'
+
+    def get_pembelian(self, obj):
+        serializer = PembelianModelSerializer(obj.pembelian)
+        return serializer.data
+    
+
+# untuk dipanggil di PembelianModelSerializer (agar tidak error)
+class PembayaranSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Pembayaran
+        exclude = ('pembelian',)
+    
+
