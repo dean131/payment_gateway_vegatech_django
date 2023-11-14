@@ -106,11 +106,14 @@ class PembelianViewSet(viewsets.ModelViewSet):
         item.save()
         pembelian.save()
 
+        serializer = serializers.ItemModelSerializer(item)
+
         return Response(
             {
                 'code': status.HTTP_201_CREATED,
                 'success': True,
                 'message': 'Pembelian berhasil ditambahkan',
+                'data': serializer.data,
             },
             status=status.HTTP_201_CREATED
         )

@@ -230,10 +230,16 @@ class PembayaranViewSet(viewsets.ViewSet):
         no_va = request.data.get('va_numbers')[0]['va_number']
 
         pembayaran = models.Pembayaran.objects.filter(no_va=no_va).first()
+        pengiriman = models.Pengiriman.objects.filter(pembelian=pembayaran.pembelian).first()
 
         if status_transaksi == 'settlement':
             pembayaran.status_pembayaran = 'lunas'
             pembayaran.save()
+
+            if pengiriman.metode_pengiriman == 'ambil_sendiri':
+                pembayaran.pembelian.status_pembelian = 'diproses'
+                pembayaran.pembelian.save()
+
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,
