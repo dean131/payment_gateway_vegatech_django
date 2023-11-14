@@ -37,6 +37,8 @@ class PembelianModelSerializer(serializers.ModelSerializer):
         return serializer.data
     
     def get_pembayaran(self, obj):
+        if obj.status_pembelian == 'keranjang':
+            return None
         pembayaran = obj.pembayaran_set.first()
         serializer = PembayaranSerializer(pembayaran)
         return serializer.data

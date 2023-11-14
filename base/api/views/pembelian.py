@@ -19,10 +19,8 @@ class PembelianViewSet(viewsets.ModelViewSet):
 
         if user_id:
             queryset = queryset.filter(user__user_id=user_id)
-
         if status_pembelian:
             queryset = queryset.filter(status_pembelian=status_pembelian)
-
         return queryset
 
     def list(self, request):
@@ -50,7 +48,7 @@ class PembelianViewSet(viewsets.ModelViewSet):
             )
         
         pembelian = models.Pembelian.objects.get(pembelian_id=pk)
-        serializer = serializers.PembelianModelSerializer(pembelian)
+        serializer = self.get_serializer(pembelian)
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -95,7 +93,6 @@ class PembelianViewSet(viewsets.ModelViewSet):
         item, created = models.Item.objects.get_or_create(pembelian=pembelian, produk=produk)
         if kuantitas <= 0:
             item.delete()
-            pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
             pembelian.save()
             return Response(
                 {
@@ -106,10 +103,7 @@ class PembelianViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK
             )
         item.kuantitas = kuantitas
-        item.total_harga_item = produk.harga_produk * kuantitas
         item.save()
-
-        # pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
         pembelian.save()
 
         return Response(
@@ -133,7 +127,7 @@ class PembelianViewSet(viewsets.ModelViewSet):
             )
 
         pembelian = models.Pembelian.objects.get(pembelian_id=pk)
-        serializer = serializers.PembelianModelSerializer(pembelian, data=request.data, partial=True)
+        serializer = self.get_serializer(pembelian, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(
                 {

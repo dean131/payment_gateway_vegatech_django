@@ -166,19 +166,16 @@ class ItemViewSet(viewsets.ModelViewSet):
         item = models.Item.objects.get(item_id=pk)
         pembelian = item.pembelian
 
-        if pembelian.status_pembelian == 'selesai':
+        if pembelian.status_pembelian != 'keranjang':
             return Response(
                 {
                     'code': status.HTTP_400_BAD_REQUEST,
                     'success': False,
-                    'message': 'Pembelian sudah selesai, tidak bisa menghapus item',
+                    'message': 'Tidak bisa menghapus item',
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         item.delete()
-
-        pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
         pembelian.save()
 
         return Response(

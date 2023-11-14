@@ -144,7 +144,7 @@ class PembayaranViewSet(viewsets.ViewSet):
         )
         pembayaran_serializer = serializers.PembayaranModelSerializer(pembayaran)
 
-        pembelian.status_pembelian = 'belum_bayar'
+        pembelian.status_pembelian = 'lunas'
         pembelian.save()
 
 
@@ -232,7 +232,7 @@ class PembayaranViewSet(viewsets.ViewSet):
         pembayaran = models.Pembayaran.objects.filter(no_va=no_va).first()
 
         if status_transaksi == 'settlement':
-            pembayaran.status_pembayaran = 'dibayar'
+            pembayaran.status_pembayaran = 'lunas'
             pembayaran.save()
             pembayaran.pembelian.status_pembelian = 'diproses'
             pembayaran.pembelian.save()
