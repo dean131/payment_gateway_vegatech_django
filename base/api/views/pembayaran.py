@@ -58,6 +58,8 @@ class PembayaranViewSet(viewsets.ViewSet):
         alamat_pengiriman = request.data.get('alamat_pengiriman')
         metode_pengiriman = request.data.get('metode_pengiriman')
         ongkos_kirim = request.data.get('ongkos_kirim', 0)
+        nama_penerima = request.data.get('nama_penerima')
+        no_telp_penerima = request.data.get('no_telp_penerima')
 
         user = User.objects.filter(user_id=user_id).first()
         if not user:
@@ -87,7 +89,9 @@ class PembayaranViewSet(viewsets.ViewSet):
                 metode_pengiriman=metode_pengiriman,
                 alamat_pengiriman='Ambil di Toko',
                 status_pengiriman='belum_diambil',
-                ongkos_kirim=0
+                ongkos_kirim=0,
+                nama_penerima=nama_penerima,
+                no_telp_penerima=no_telp_penerima
             )
             ongkos_kirim = 0
         else:
@@ -96,7 +100,9 @@ class PembayaranViewSet(viewsets.ViewSet):
                 metode_pengiriman=metode_pengiriman,
                 alamat_pengiriman=alamat_pengiriman,
                 status_pengiriman='belum_dikirim',
-                ongkos_kirim=ongkos_kirim
+                ongkos_kirim=ongkos_kirim,
+                nama_penerima=nama_penerima,
+                no_telp_penerima=no_telp_penerima
             )
         
         core = midtransclient.CoreApi(

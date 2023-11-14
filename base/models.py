@@ -86,6 +86,8 @@ class Pengiriman(models.Model):
     status_pengiriman = models.CharField(max_length=20, choices=STATUS_CHOICES)
     no_resi = models.CharField(max_length=255, blank=True, null=True)
     ongkos_kirim = models.IntegerField(default=0)
+    no_telp_penerima = models.CharField(max_length=255, blank=True, null=True)
+    nama_penerima = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return str(self.pengiriman_id)
