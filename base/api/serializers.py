@@ -18,12 +18,16 @@ class PengirimanModelSerializer(serializers.ModelSerializer):
 
 
 class PembelianModelSerializer(serializers.ModelSerializer):
-    user = UserModelSerializer()
+    user = serializers.SerializerMethodField('get_user')
     pengiriman = serializers.SerializerMethodField('get_pengiriman')
     pembayaran = serializers.SerializerMethodField('get_pembayaran')
     class Meta:
         model = models.Pembelian
         fields = '__all__'
+
+    def get_user(self, obj):
+        serializer = UserModelSerializer(obj.user, context=self.context)
+        return serializer.data
 
     def get_pengiriman(self, obj):
         if obj.status_pembelian == 'keranjang':
@@ -39,10 +43,14 @@ class PembelianModelSerializer(serializers.ModelSerializer):
 
 
 class ItemModelSerializer(serializers.ModelSerializer):
-    produk = ProdukModelSerializer()
+    produk = serializers.SerializerMethodField('get_produk')
     class Meta:
         model = models.Item
         fields = '__all__'
+
+    def get_produk(self, obj):
+        serializer = ProdukModelSerializer(obj.produk, context=self.context)
+        return serializer.data
 
 
 class PembayaranModelSerializer(serializers.ModelSerializer):

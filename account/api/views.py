@@ -210,7 +210,7 @@ class UserLoginAPIView(views.APIView):
                 'code': status.HTTP_200_OK,
                 'success': True,
                 'message': 'Login berhasil',
-                'data': UserModelSerializer(user).data,
+                'data': UserModelSerializer(user, context={'request': request}).data,
             },
             status=status.HTTP_200_OK
         )

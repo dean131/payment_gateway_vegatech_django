@@ -9,6 +9,8 @@ from base import models
 
 
 class ItemViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ItemModelSerializer
+
     def get_queryset(self):
         queryset = models.Item.objects.all()
         pembelian_id = self.request.query_params.get('pembelian_id')
@@ -20,7 +22,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         items = self.get_queryset()
-        serializer = serializers.ItemModelSerializer(items, many=True)
+        serializer = self.get_serializer(items, many=True)
         return Response(
             {
                 'code': 200,
