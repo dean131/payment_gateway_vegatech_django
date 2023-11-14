@@ -202,6 +202,16 @@ class PembelianViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+        if pembayaran.status_pembayaran == 'lunas':
+            return Response(
+                {
+                    'code': status.HTTP_400_BAD_REQUEST,
+                    'success': False,
+                    'message': 'Pembayaran sudah lunas. Tidak bisa dibatalkan',
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         core = midtransclient.CoreApi(
             is_production=False,
@@ -209,7 +219,7 @@ class PembelianViewSet(viewsets.ModelViewSet):
             client_key=settings.MIDTRANS_CLIENT_KEY
         )
         
-        res = core.transactions.cancel(pembayaran.transaksi_id)
+        res = core.transactions.cancel(pembelian.pembelian_id)
         if res.status_code != '200':
             return Response(
                 {
@@ -219,8 +229,6 @@ class PembelianViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        print(res)
-        print(res.transaction_status)
         pembayaran.status_pembayaran = 'dibatalkan'
         pembayaran.save()
         pembelian.status_pembelian = 'dibatalkan'
