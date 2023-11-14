@@ -151,6 +151,9 @@ class PengirimanViewSet(ViewSet):
         pengiriman.status_pengiriman = 'dikirim'
         pengiriman.save()
 
+        pengiriman.pembelian.status_pembelian = 'diproses'
+        pengiriman.pembelian.save()
+
         return Response(
             {
                 'code': status.HTTP_200_OK,

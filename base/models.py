@@ -8,18 +8,26 @@ class Pembelian(models.Model):
     STATUS_CHOICES = (
         ('keranjang', 'Keranjang'),
         ('belum_bayar', 'Belum bayar'),
+
         ('diproses', 'Diproses'),
         ('selesai', 'Selesai'),
+
         ('dibatalkan', 'Dibatalkan'),
     )
     pembelian_id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     waktu_pembelian = models.DateTimeField(auto_now=True)
     status_pembelian = models.CharField(max_length=20, default='keranjang', choices=STATUS_CHOICES)
     total_harga_pembelian = models.IntegerField(default=0)
+    total_berat = models.IntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.pembelian_id)
+    
+    def save(self, *args, **kwargs):
+        self.total_harga_pembelian = sum([item.total_harga_item for item in self.item_set.all()])
+        self.total_berat = sum([item.produk.berat_produk for item in self.item_set.all()])
+        super().save(*args, **kwargs)
     
 
 class Produk(models.Model):
@@ -65,8 +73,10 @@ class Pengiriman(models.Model):
     STATUS_CHOICES = (
         ('belum_dikirim', 'Belum dikirim'),
         ('belum_diambil', 'Belum diambil'),
+
         ('dikirim', 'Dikirim'),
         ('diterima', 'Diterima'),
+
         ('dibatalkan', 'Dibatalkan')
     )
     pengiriman_id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)

@@ -10,6 +10,8 @@ from base import models
    
 
 class PembelianViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.PembelianModelSerializer
+
     def get_queryset(self):
         queryset = models.Pembelian.objects.all()
         user_id = self.request.query_params.get('user_id')
@@ -25,7 +27,7 @@ class PembelianViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         pembelians = self.get_queryset()
-        serializer = serializers.PembelianModelSerializer(pembelians, many=True)
+        serializer = self.get_serializer(pembelians, many=True)
         return Response(
             {
                 'code': status.HTTP_200_OK,
@@ -107,7 +109,7 @@ class PembelianViewSet(viewsets.ModelViewSet):
         item.total_harga_item = produk.harga_produk * kuantitas
         item.save()
 
-        pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
+        # pembelian.total_harga_pembelian = sum([item.total_harga_item for item in pembelian.item_set.all()])
         pembelian.save()
 
         return Response(
