@@ -31,6 +31,8 @@ class Pembelian(models.Model):
     def save(self, *args, **kwargs):
         self.total_harga_pembelian = sum([item.total_harga_item for item in self.item_set.all()])
         self.total_berat = sum([item.produk.berat_produk * item.kuantitas  for item in self.item_set.all()])
+        if self.item_set.all().count() == 0:
+            self.delete()
         super().save(*args, **kwargs)
     
 
