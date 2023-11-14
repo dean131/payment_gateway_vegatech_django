@@ -1,12 +1,15 @@
 from django.db import transaction
+from django.conf import settings
 
-from rest_framework import viewsets
-from rest_framework import status
+from rest_framework.decorators import action 
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 from account.models import User
 from base.api import serializers
 from base import models
+
+import midtransclient
    
 
 class PembelianViewSet(viewsets.ModelViewSet):
@@ -174,4 +177,64 @@ class PembelianViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, methods=['post'])
+    def batalkan_pembelian(self, request):
+        pembelian_id=request.data.get('pembelian_id')
+        pembelian = models.Pembelian.objects.filter(pembelian_id=pembelian_id, status_pembelian='menunggu').first()
 
+        if not pembelian:
+            return Response(
+                {
+                    'code': status.HTTP_404_NOT_FOUND,
+                    'success': False,
+                    'message': 'Pembelian tidak ditemukan',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        pembayaran = pembelian.pembayaran_set.first()
+        if not pembayaran:
+            return Response(
+                {
+                    'code': status.HTTP_404_NOT_FOUND,
+                    'success': False,
+                    'message': 'Pembayaran tidak ditemukan',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        core = midtransclient.CoreApi(
+            is_production=False,
+            server_key=settings.MIDTRANS_SERVER_KEY,
+            client_key=settings.MIDTRANS_CLIENT_KEY
+        )
+        
+        res = core.transactions.cancel(pembayaran.transaksi_id)
+        if res.status_code != '200':
+            return Response(
+                {
+                    'code': status.HTTP_400_BAD_REQUEST,
+                    'success': False,
+                    'message': 'Pembatalan pembelian gagal',
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        print(res)
+        print(res.transaction_status)
+        pembayaran.status_pembayaran = 'dibatalkan'
+        pembayaran.save()
+        pembelian.status_pembelian = 'dibatalkan'
+        pembelian.save()
+        pengiriman = pembelian.pengiriman_set.first()
+        pengiriman.status_pengiriman = 'dibatalkan'
+        pengiriman.save()
+
+        return Response(
+            {
+                'code': status.HTTP_200_OK,
+                'success': True,
+                'message': 'Pembelian berhasil dibatalkan',
+            },
+            status=status.HTTP_200_OK
+        )
+        

@@ -151,3 +151,6 @@ MEDIA_ROOT = '/home/faiz7297/public_html/vegatech.faiznazhir.com/static/media' #
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
