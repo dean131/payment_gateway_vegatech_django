@@ -4,20 +4,8 @@ from django.db import models
 from django.conf import settings
 
 
-def generate_pembelian_id():
-    return 'PBL' + get_random_string(7)
-
-def generate_pengiriman_id():
-    return 'PNG' + get_random_string(7)
-
-def generate_pembayaran_id():
-    return 'PBY' + get_random_string(7)
-
-def generate_item_id():
-    return 'ITM' + get_random_string(7)
-
-def generate_produk_id():
-    return 'PRD' + get_random_string(7)
+def generate_id():
+    return get_random_string(6)
 
 
 class Pembelian(models.Model):
@@ -30,7 +18,7 @@ class Pembelian(models.Model):
 
         ('dibatalkan', 'Dibatalkan'),
     )
-    pembelian_id = models.CharField(max_length=20, default=generate_pembelian_id, primary_key=True, editable=False)
+    pembelian_id = models.CharField(max_length=20, default=generate_id, primary_key=True, editable=False)
     waktu_pembelian = models.DateTimeField(auto_now=True)
     status_pembelian = models.CharField(max_length=20, default='keranjang', choices=STATUS_CHOICES)
     total_harga_pembelian = models.IntegerField(default=0)
@@ -56,7 +44,7 @@ class Produk(models.Model):
         ('hardware', 'Hardware'),
         ('aksesoris', 'Aksesoris'),
     )
-    produk_id = models.CharField(max_length=20, default=generate_produk_id, primary_key=True, editable=False)
+    produk_id = models.CharField(max_length=20, default=generate_id, primary_key=True, editable=False)
     nama_produk = models.CharField(max_length=200)
     deskripsi_produk = models.TextField(blank=True, null=True)
     harga_produk = models.IntegerField()
@@ -70,7 +58,7 @@ class Produk(models.Model):
 
 
 class Item(models.Model):
-    item_id = models.CharField(max_length=20, default=generate_item_id, primary_key=True, editable=False)
+    item_id = models.CharField(max_length=20, default=generate_id, primary_key=True, editable=False)
     pembelian = models.ForeignKey(Pembelian, on_delete=models.CASCADE)
     produk = models.ForeignKey(Produk, on_delete=models.CASCADE)
     kuantitas = models.IntegerField(default=0)
@@ -99,7 +87,7 @@ class Pengiriman(models.Model):
 
         ('dibatalkan', 'Dibatalkan')
     )
-    pengiriman_id = models.CharField(max_length=20, default=generate_pengiriman_id, primary_key=True, editable=False)
+    pengiriman_id = models.CharField(max_length=20, default=generate_id, primary_key=True, editable=False)
     pembelian = models.OneToOneField(Pembelian, on_delete=models.CASCADE)
     metode_pengiriman = models.CharField(max_length=20, choices=METODE_CHOICES)
     alamat_pengiriman = models.TextField(null=True, blank=True)
@@ -117,11 +105,11 @@ class Pembayaran(models.Model):
     STATUS_CHOICES = (
         ('belum_bayar', 'Belum bayar'),
         ('kadaluarsa', 'Kadaluarsa'),
-        ('dibayar', 'Dibayar'),
+        ('lunas', 'Lunas'),
         ('dibatalkan', 'Dibatalkan')
     )
 
-    pembayaran_id = models.CharField(max_length=20, default=generate_pembayaran_id, primary_key=True, editable=False)
+    pembayaran_id = models.CharField(max_length=20, default=generate_id, primary_key=True, editable=False)
     pembelian = models.ForeignKey(Pembelian, on_delete=models.CASCADE)
     transaksi_id = models.CharField(max_length=255, blank=True, null=True)
     nama_bank = models.CharField(max_length=20)

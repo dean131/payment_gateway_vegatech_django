@@ -144,7 +144,7 @@ class PembayaranViewSet(viewsets.ViewSet):
         )
         pembayaran_serializer = serializers.PembayaranModelSerializer(pembayaran)
 
-        pembelian.status_pembelian = 'lunas'
+        pembelian.status_pembelian = 'menunggu'
         pembelian.save()
 
 
@@ -223,7 +223,7 @@ class PembayaranViewSet(viewsets.ViewSet):
             },
             status=status.HTTP_200_OK
         )
-    
+
     @action(detail=False, methods=['post'])
     def notification_handler(self, request):
         status_transaksi = request.data.get('transaction_status')
@@ -234,8 +234,6 @@ class PembayaranViewSet(viewsets.ViewSet):
         if status_transaksi == 'settlement':
             pembayaran.status_pembayaran = 'lunas'
             pembayaran.save()
-            pembayaran.pembelian.status_pembelian = 'diproses'
-            pembayaran.pembelian.save()
             return Response(
                 {
                     'status_code': status.HTTP_200_OK,

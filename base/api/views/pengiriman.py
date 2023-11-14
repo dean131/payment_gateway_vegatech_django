@@ -136,8 +136,12 @@ class PengirimanViewSet(ViewSet):
     
     @action(methods=['post'], detail=False)
     def kirim(self, request):
-        pengiriman_id = request.data.get('pengiriman_id')
-        pengiriman = models.Pengiriman.objects.filter(pengiriman_id=pengiriman_id).first()
+        pembelian_id = request.data.get('pembelian_id')
+        no_resi = request.data.get('no_resi')
+
+        pembelian = models.Pembelian.objects.filter(pembelian_id=pembelian_id).first()
+
+        pengiriman = models.Pengiriman.objects.filter(pembelian=pembelian).first()
         if not pengiriman:
             return Response(
                 {
@@ -149,6 +153,7 @@ class PengirimanViewSet(ViewSet):
             )
         
         pengiriman.status_pengiriman = 'dikirim'
+        pengiriman.no_resi = no_resi
         pengiriman.save()
 
         pengiriman.pembelian.status_pembelian = 'diproses'
