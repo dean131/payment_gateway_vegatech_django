@@ -111,16 +111,38 @@ class PembayaranViewSet(viewsets.ViewSet):
             client_key=settings.MIDTRANS_CLIENT_KEY
         )
 
-        param = {
-            "payment_type": "bank_transfer",
-            "transaction_details": {
-                "gross_amount": pembelian.total_harga_pembelian + ongkos_kirim,
-                "order_id": str(pembelian.pembelian_id),
-            },
-            "bank_transfer":{
-                "bank": nama_bank,
+        param = {}
+        if nama_bank == 'mandiri':
+            param = {
+                "payment_type": "echannel",
+                "transaction_details": {
+                    "order_id": str(pembelian.pembelian_id),
+                    "gross_amount": pembelian.total_harga_pembelian + ongkos_kirim
+                },
+                "echannel" : {
+                    "bill_info1" : "Payment:",
+                    "bill_info2" : "Online purchase"
+                }
             }
-        }
+        elif nama_bank == 'permata':
+            param = {
+                "payment_type": "permata",
+                "transaction_details": {
+                    "order_id": str(pembelian.pembelian_id),
+                    "gross_amount": pembelian.total_harga_pembelian + ongkos_kirim
+                }
+            }
+        elif nama_bank in ['bca', 'bni', 'bri', 'cimb']:
+            param = {
+                "payment_type": "bank_transfer",
+                "transaction_details": {
+                    "gross_amount": pembelian.total_harga_pembelian + ongkos_kirim,
+                    "order_id": str(pembelian.pembelian_id),
+                },
+                "bank_transfer":{
+                    "bank": nama_bank,
+                }
+            }
 
         charge_response = core.charge(param)
         if charge_response['status_code'] != '201':
@@ -135,11 +157,11 @@ class PembayaranViewSet(viewsets.ViewSet):
             )
         
         va_number = ''
-        if charge_response.get('bill_key'):
+        if nama_bank == 'mandiri':
             va_number = charge_response.get('bill_key')
-        elif charge_response.get('permata_va_number'):
+        elif nama_bank == 'permata':
             va_number = charge_response.get('permata_va_number')
-        elif charge_response.get('va_numbers')[0].get('va_number'):
+        elif nama_bank in ['bca', 'bni', 'bri', 'cimb']:
             va_number = charge_response.get('va_numbers')[0].get('va_number')
         else:
             return Response(
