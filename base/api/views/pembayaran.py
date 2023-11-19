@@ -158,7 +158,9 @@ class PembayaranViewSet(viewsets.ViewSet):
         
         va_number = ''
         if nama_bank == 'mandiri':
-            va_number = charge_response.get('bill_key')
+            biller_code = charge_response.get('biller_code')
+            bill_key = charge_response.get('bill_key')
+            va_number = f'{biller_code}-{bill_key}'
         elif nama_bank == 'permata':
             va_number = charge_response.get('permata_va_number')
         elif nama_bank in ['bca', 'bni', 'bri', 'cimb']:
