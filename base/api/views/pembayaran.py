@@ -146,7 +146,7 @@ class PembayaranViewSet(viewsets.ViewSet):
                 {
                     'code': status.HTTP_400_BAD_REQUEST,
                     'success': False,
-                    'message': 'Pembayaran gagal ditambahkan',
+                    'message': 'Bank tidak ditemukan.',
                     # 'data': charge_response['status_message']
                 },
                 status=status.HTTP_400_BAD_REQUEST
