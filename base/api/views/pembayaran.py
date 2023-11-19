@@ -129,7 +129,25 @@ class PembayaranViewSet(viewsets.ViewSet):
                     'code': status.HTTP_400_BAD_REQUEST,
                     'success': False,
                     'message': 'Pembayaran gagal ditambahkan',
-                    'data': charge_response['status_message']
+                    # 'data': charge_response['status_message']
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        va_number = ''
+        if charge_response.get('bill_key'):
+            va_number = charge_response.get('bill_key')
+        elif charge_response.get('permata_va_number'):
+            va_number = charge_response.get('permata_va_number')
+        elif charge_response.get('va_numbers')[0].get('va_number'):
+            va_number = charge_response.get('va_numbers')[0].get('va_number')
+        else:
+            return Response(
+                {
+                    'code': status.HTTP_400_BAD_REQUEST,
+                    'success': False,
+                    'message': 'Pembayaran gagal ditambahkan',
+                    # 'data': charge_response['status_message']
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -139,7 +157,7 @@ class PembayaranViewSet(viewsets.ViewSet):
             transaksi_id=charge_response['transaction_id'],
             nama_bank=nama_bank,
             waktu_pembayaran=charge_response['transaction_time'],
-            no_va=charge_response['va_numbers'][0]['va_number'],
+            no_va=va_number,
             total_pembayaran=float(charge_response['gross_amount'])
         )
         pembayaran_serializer = serializers.PembayaranModelSerializer(pembayaran)
